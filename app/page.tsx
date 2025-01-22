@@ -80,20 +80,21 @@ export default function Home() {
         <div className="w-96">
           {/* Input area for pasting email titles */}
           <Textarea
+            className="min-w-full"
             onChange={(e) => setMessage(e.target.value)}
             value={message}
             placeholder="Paste your copied emails titles here."
           />
         </div>
-        <div className="flex gap-x-4 mt-4">
+        <div className="flex gap-x-4 mt-4 w-full justify-start">
           <Button onClick={handleTokenizeOutlook}>Tokenize Outlook</Button>
           <Button onClick={handleTokenizeSnowflake}>Tokenize Snowflake</Button>
         </div>
 
         {tokens.length > 0 && (
-          <div>
-            <h4>Tokens:</h4>
-            <ul>
+          <div className="mt-4">
+            <h4 className="text-lg font-bold">Tokens:</h4>
+            <ul className="flex flex-col divide-y divide-gray-200">
               {tokens.map((token, index) => {
                 const splitTokens = token.split(" "); // Split the token by space
                 return (
