@@ -272,12 +272,40 @@ export default function Home() {
   const [isCopiedId, setIsCopiedId] = useState<string>(""); // State to track copied status
   const [completedTokens, setCompletedTokens] = useState<number[]>([]); // State to track completed tokens
 
-  const handleTokenize = () => {
+  const handleTokenizeSnowflake = () => {
     const regex =
-      /(usecase\/.*?\/raw_eod_pe_investment_delta)\/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z)/g;
+      /(usecase\/.*?\/(raw_.*?))\s+(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2}\.\d{3})\s+([+-]\d{2}\d{2})\s+\d+/g;
 
     const matches = [...message.matchAll(regex)];
-    const result = matches.map((match) => `${match[1]} ${match[2]}`);
+    const result = matches.map((match) => {
+      const token = match[1]; // The token part
+      const dateString = `${match[3]} ${match[4]}`; // Constructing the date string with timezone
+      const dateWithoutTimezone = dateString.replace(/ \+\d{4}$/, ""); // Remove the timezone offset
+      const date = new Date(dateWithoutTimezone + "Z"); // Create a Date object in UTC
+      const isoString = date.toISOString(); // Convert to ISO string
+      return `${token} ${isoString}`; // Return the token with the UTC date
+    });
+
+    // Group tokens and count occurrences
+    const tokenCountMap: { [key: string]: number } = {};
+    result.forEach((token) => {
+      tokenCountMap[token] = (tokenCountMap[token] || 0) + 1;
+    });
+
+    // Convert the map back to an array of strings with counts
+    const groupedTokens = Object.entries(tokenCountMap).map(
+      ([token, count]) => `${token} ${count}`
+    );
+
+    setTokens(groupedTokens); // Store the grouped result in state
+  };
+
+  const handleTokenizeOutlook = () => {
+    const regex =
+      /(usecase\/.*?\/(raw_.*?))\/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z)/g;
+
+    const matches = [...message.matchAll(regex)];
+    const result = matches.map((match) => `${match[1]} ${match[3]}`);
 
     // Group tokens and count occurrences
     const tokenCountMap: { [key: string]: number } = {};
@@ -310,22 +338,22 @@ export default function Home() {
   return (
     <div className="grid items-center justify-items-center min-h-screen font-[family-name:var(--font-geist-sans)]">
       <main>
-        <div className="flex gap-x-4">
-          <div className="grid w-full min-w-96 gap-2">
-            <Textarea
-              onChange={(e) => setMessage(e.target.value)}
-              value={message}
-              placeholder="Paste your copied emails titles here."
-            />
-            <Button onClick={handleTokenize}>Tokenize</Button>
-          </div>
-          <RegexReplacer message={message} setMessage={setMessage} />
+        <div className="w-96">
+          {/* Input area for pasting email titles */}
+          <Textarea
+            onChange={(e) => setMessage(e.target.value)}
+            value={message}
+            placeholder="Paste your copied emails titles here."
+          />
+        </div>
+        <div className="flex gap-x-4 mt-4">
+          <Button onClick={handleTokenizeOutlook}>Tokenize Outlook</Button>
+          <Button onClick={handleTokenizeSnowflake}>Tokenize Snowflake</Button>
         </div>
 
         {tokens.length > 0 && (
           <div>
             <h4>Tokens:</h4>
-
             <ul>
               {tokens.map((token, index) => {
                 const splitTokens = token.split(" "); // Split the token by space
