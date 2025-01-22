@@ -197,7 +197,9 @@ const RegexReplacer = ({
 
       setMessage(newMessage);
     } catch (error) {
-      alert(`Failed to reapply regex pattern. Please check the pattern.`);
+      alert(
+        `Failed to reapply regex pattern. Please check the pattern. ${error}`
+      );
     }
   };
 
@@ -209,7 +211,7 @@ const RegexReplacer = ({
       const newMessage = message.replace(regex, pattern); // Undo the regex operation
       setMessage(newMessage);
     } catch (error) {
-      alert(`Failed to undo regex pattern. Please check the pattern.`);
+      alert(`Failed to undo regex pattern. Please check the pattern. ${error}`);
     }
   };
 
@@ -263,12 +265,6 @@ const RegexReplacer = ({
     </div>
   );
 };
-
-const regexPatterns: string[] = [
-  "From Subject Received Size Categories",
-  `sin0r4app2152xp-noreply@gic.com.sg \[DIF\] Job failure`,
-  "d+:d+Ww+Wd+Ww+",
-];
 
 export default function Home() {
   const [message, setMessage] = useState("");
