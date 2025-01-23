@@ -5,6 +5,9 @@ import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CopyIcon, CheckIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useRef, useEffect } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 export default function Home() {
   const [message, setMessage] = useState("");
@@ -16,6 +19,7 @@ export default function Home() {
   const [history, setHistory] = useState<
     { pattern: string; tokens: string[] }[]
   >([]);
+  const [parent] = useAutoAnimate();
 
   const handleTokenizeSnowflake = () => {
     const regex =
@@ -115,28 +119,51 @@ export default function Home() {
     });
   };
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [message]);
+
   return (
-    <div className="grid items-center justify-items-center min-h-screen font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col md:flex-row gap-4 md:mt-0 mt-32 px-16">
-        <div>
-          <div className="w-96">
+    <div className="grid justify-items-center min-h-screen font-[family-name:var(--font-geist-sans)]">
+      <h1 className="text-4xl font-bold my-8">Copy Pesto</h1>
+      <main className="grid gap-8 w-full max-w-7xl px-8 place-self-center">
+        <div className="w-full">
+          <div className="w-full">
             <Textarea
-              className="min-w-full"
-              onChange={(e) => setMessage(e.target.value)}
+              ref={textareaRef}
+              className="w-full min-h-[100px] overflow-hidden resize-none p-4 rounded-lg"
+              onChange={(e) => {
+                setMessage(e.target.value);
+              }}
               value={message}
               placeholder="Paste your copied emails titles here."
             />
           </div>
-          <div className="flex gap-x-4 mt-4 w-full justify-start">
-            <Button onClick={handleTokenizeOutlook}>Tokenize Outlook</Button>
-            <Button onClick={handleTokenizeSnowflake}>
+          <div className="flex gap-x-4 mt-4 w-full">
+            <Button className="flex-1" onClick={handleTokenizeOutlook}>
+              Tokenize Outlook
+            </Button>
+            <Button className="flex-1" onClick={handleTokenizeSnowflake}>
               Tokenize Snowflake
             </Button>
           </div>
           {tokens.length > 0 && (
-            <div className="mt-4">
+            <div className="mt-8">
               <h4 className="text-lg font-bold">Tokens:</h4>
-              <ul className="flex flex-col divide-y divide-gray-200">
+              <ul
+                ref={parent}
+                className="flex flex-col divide-y divide-gray-200"
+              >
                 {tokens.map((token, index) => {
                   const splitTokens = token.split(" "); // Split the token by space
                   return (
@@ -174,7 +201,7 @@ export default function Home() {
           )}
         </div>
         {history.length > 0 && (
-          <div className="w-96">
+          <div className="w-full">
             <div className="flex flex-col gap-2">
               <Input
                 type="text"
@@ -204,35 +231,38 @@ export default function Home() {
               </div>
             </div>
 
-            <h4 className="font-semibold">History:</h4>
-            <ul className="flex flex-col divide-y divide-gray-200 text-xs ">
-              {history.map((item, index) => (
-                <li key={index}>
-                  <h4 className="font-semibold">{item.pattern}</h4>
-                  <ul className="flex flex-col divide-y divide-gray-200">
-                    {item.tokens.map((token, index) => (
-                      <li key={index}>{token}</li>
-                    ))}
-                  </ul>
-                  <div className="flex gap-x-2">
-                    <Button
-                      variant={"outline"}
-                      onClick={() =>
-                        handleApply(item.pattern, item.tokens[index])
-                      }
-                    >
-                      Apply
-                    </Button>
-                    <Button
-                      variant={"outline"}
-                      onClick={() => handleDelete(item.pattern)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <ScrollArea className="max-h-[320px] h-fit w-full rounded-md border p-4 mt-4">
+              <ul className="flex flex-col divide-y divide-gray-200 text-xs space-y-4">
+                {history.map((item, index) => (
+                  <li key={index} className="pt-4 first:pt-0">
+                    <h4 className="font-semibold">{item.pattern}</h4>
+                    <ul className="flex flex-col divide-y divide-gray-200">
+                      {item.tokens.map((token, index) => (
+                        <li key={index} className="py-2">
+                          {token}
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="flex gap-x-2 mt-2">
+                      <Button
+                        variant={"outline"}
+                        onClick={() =>
+                          handleApply(item.pattern, item.tokens[index])
+                        }
+                      >
+                        Apply
+                      </Button>
+                      <Button
+                        variant={"outline"}
+                        onClick={() => handleDelete(item.pattern)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </ScrollArea>
           </div>
         )}
       </main>
