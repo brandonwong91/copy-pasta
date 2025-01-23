@@ -117,7 +117,7 @@ export default function Home() {
 
   return (
     <div className="grid items-center justify-items-center min-h-screen font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-row gap-4 md:flex-col md:mt-32">
+      <main className="flex flex-col md:flex-row gap-4 md:mt-0 mt-32 px-16">
         <div>
           <div className="w-96">
             <Textarea
