@@ -20,6 +20,16 @@ export default function Home() {
     { pattern: string; tokens: string[] }[]
   >([]);
   const [parent] = useAutoAnimate();
+  // Add these state declarations after other states
+  const [utcTime, setUtcTime] = useState(() =>
+    new Date().toISOString().slice(0, 19)
+  );
+  const [gmtTime, setGmtTime] = useState(() => {
+    const now = new Date();
+    return new Date(now.getTime() + 8 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 19);
+  });
 
   const handleTokenizeSnowflake = () => {
     const regex =
@@ -136,16 +146,52 @@ export default function Home() {
       <h1 className="text-4xl font-bold my-8">Copy Pesto</h1>
       <main className="grid gap-8 w-full max-w-7xl px-8 place-self-center">
         <div className="w-full">
-          <div className="w-full">
-            <Textarea
-              ref={textareaRef}
-              className="w-full min-h-[100px] overflow-hidden resize-none p-4 rounded-lg"
-              onChange={(e) => {
-                setMessage(e.target.value);
-              }}
-              value={message}
-              placeholder="Paste your copied emails titles here."
-            />
+          <div className="flex gap-8">
+            <div className="w-full">
+              <Textarea
+                ref={textareaRef}
+                className="w-full min-h-[100px] overflow-hidden resize-none p-4 rounded-lg"
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                }}
+                value={message}
+                placeholder="Paste your copied emails titles here."
+              />
+            </div>
+            <div className="flex flex-col gap-4 min-w-[300px]">
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">UTC</h4>
+                  <Input
+                    type="datetime-local"
+                    value={utcTime}
+                    onChange={(e) => {
+                      const utcDate = new Date(e.target.value + "Z"); // Add Z to make it UTC
+                      setUtcTime(e.target.value);
+                      const gmtDate = new Date(
+                        utcDate.getTime() + 8 * 60 * 60 * 1000
+                      );
+                      setGmtTime(gmtDate.toISOString().slice(0, 19));
+                    }}
+                  />
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">GMT+8</h4>
+                  <Input
+                    type="datetime-local"
+                    value={gmtTime}
+                    onChange={(e) => {
+                      setGmtTime(e.target.value);
+                      const gmtDate = new Date(e.target.value);
+                      const utcDate = new Date(
+                        gmtDate.getTime() - 8 * 60 * 60 * 1000
+                      );
+                      setUtcTime(utcDate.toISOString().slice(0, 19));
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
           <div className="flex gap-x-4 mt-4 w-full">
             <Button className="flex-1" onClick={handleTokenizeOutlook}>
