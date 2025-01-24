@@ -23,17 +23,15 @@ export default function Home() {
 
   const handleTokenizeSnowflake = () => {
     const regex =
-      /(usecase\/.*?\/(raw_.*?))\s+(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})\.\d{3}\s+([+-]\d{2}\d{2})\s+\d+/g;
+      /(usecase\/.*?\/(raw_.*?))\s+(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d{3}\s+[+-]\d{2}\d{2})\s+\d+/g;
 
     const matches = [...message.matchAll(regex)];
     const result = matches.map((match) => {
       const token = match[1]; // The token part
-      const dateString = `${match[3]} ${match[4]}`; // Constructing the date string with timezone
-      const dateWithoutTimezone = dateString.replace(/ \+\d{4}$/, ""); // Remove the timezone offset
-      const date = new Date(dateWithoutTimezone); // Create a Date object in local time
-      const utcDate = new Date(date.getTime() - 8 * 60 * 60 * 1000); // Subtract 8 hours to convert to UTC
-      const isoString = utcDate.toISOString().replace(/\.\d{3}Z$/, "Z"); // Convert to ISO string
-      return `${token} ${isoString}`; // Return the token with the UTC date
+      const dateString = `${match[3]}`; // Constructing the date string with timezone
+      const date = new Date(dateString).toISOString().replace(/\.\d{3}Z$/, "Z"); // Create a Date object in local time
+
+      return `${token} ${date}`; // Return the token with the UTC date
     });
 
     // Group tokens and count occurrences
