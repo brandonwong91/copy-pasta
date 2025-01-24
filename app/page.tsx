@@ -150,7 +150,7 @@ export default function Home() {
             <div className="w-full">
               <Textarea
                 ref={textareaRef}
-                className="w-full min-h-[100px] overflow-hidden resize-none p-4 rounded-lg"
+                className="w-full min-h-[150px] overflow-hidden resize-none p-4 rounded-lg"
                 onChange={(e) => {
                   setMessage(e.target.value);
                 }}
