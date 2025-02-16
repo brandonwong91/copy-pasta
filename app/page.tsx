@@ -91,18 +91,33 @@ export default function Home() {
     ]);
   };
 
-  const handleCopy = (token: string, index: number) => {
-    navigator.clipboard.writeText(token);
-    setIsCopiedId(token);
-    setCompletedTokens((prev) => {
-      const newCompletedTokens = [...prev];
-      // increment the count of the token for each index
-      const tokenCount = prev[index] ? prev[index] + 1 : 1;
-      newCompletedTokens[index] = tokenCount;
-
-      return newCompletedTokens;
-    });
-    setTimeout(() => setIsCopiedId(""), 2000); // Reset after 2 seconds
+  const handleCopy = async (token: string, index: number) => {
+    try {
+      await navigator.clipboard.writeText(token);
+      setIsCopiedId(token);
+      setCompletedTokens((prev) => {
+        const newCompletedTokens = [...prev];
+        const tokenCount = prev[index] ? prev[index] + 1 : 1;
+        newCompletedTokens[index] = tokenCount;
+        return newCompletedTokens;
+      });
+      setTimeout(() => setIsCopiedId(""), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+      // Fallback method for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = token;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand("copy");
+        setIsCopiedId(token);
+        setTimeout(() => setIsCopiedId(""), 2000);
+      } catch (e) {
+        console.error("Fallback copy failed:", e);
+      }
+      document.body.removeChild(textArea);
+    }
   };
 
   const handleApply = (pattern: string, replacePattern: string) => {
@@ -224,7 +239,7 @@ export default function Home() {
                               <Button
                                 variant={"ghost"}
                                 size={"icon"}
-                                onClick={() => handleCopy(token, index)}
+                                onClick={() => handleCopy(splitToken, index)}
                                 className="ml-2"
                               >
                                 {isCopiedId === splitToken ? (
