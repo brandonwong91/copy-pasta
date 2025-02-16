@@ -189,6 +189,9 @@ export default function Home() {
                       setGmtTime(gmtDate.toISOString().slice(0, 19));
                     }}
                   />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {new Date(utcTime + "Z").toISOString().replace(".000", "")}
+                  </p>
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold mb-2">GMT+8</h4>
@@ -204,6 +207,9 @@ export default function Home() {
                       setUtcTime(utcDate.toISOString().slice(0, 19));
                     }}
                   />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {new Date(gmtTime).toISOString().replace(".000", "")}
+                  </p>
                 </div>
               </div>
             </div>
